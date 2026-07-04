@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+  <meta charset="UTF-8">
+  <title>KidsConnect</title>
+  <link rel="stylesheet" href="main.css">
+</head>
+
+<body>
+  <div id="app">
+
+    <header class="site-header">
+      <div class="logo">
+        <span class="logo-text">KidsConnect</span>
+      </div>
+    </header>
+
+    <div v-if="currentPage === 'catalog'" class="catalog-page">
+
+      <div class="toolbar">
+        <div class="toolbar-left">
+          <div class="search-box">
+            <span class="search-icon">🔍</span>
+            <input class="search-input" type="text" placeholder="Поиск">
+          </div>
+
+          <div class="tabs">
+            <button v-for="tab in tabs" :key="tab" :class="['tab',{active:activeTab===tab}]" @click="activeTab = tab">
+              {{ tab }}
+            </button>
+          </div>
+        </div>
+
+        <button class="map-button">На карте </button>
+      </div>
+
+      <div class="catalog-layout">
+
+        <main class="catalog-main">
+          <section v-for="category in categories" :key="category.name" class="category">
+
+            <h2 class="category-title">
+              {{ category.name }}
+            </h2>
+
+            <article v-for="section in category.sections" :key="section.id" class="card">
+
+              <div class="card-image">
+                <div class="card-image-placeholder">📷</div>
+              </div>
+
+              <div class="card-content">
+
+                <div class="card-header">
+                  <div>
+                    <h3 class="card-title">
+                      {{ section.title }}
+                    </h3>
+                    <p class="card-tag">
+                      #{{ section.tag }}
+                    </p>
+                  </div>
+
+                  <div class="badges">
+                    <span v-if="section.free" class="tag tag-free">
+                      Бесплатно
+                    </span>
+
+                    <template v-else>
+                      <span class="tag tag-first-free">
+                        Первое бесплатно
+                      </span>
+
+                      <span class="tag tag-price">
+                        {{ section.price }}
+                      </span>
+                    </template>
+                  </div>
+                </div>
+
+                <div class="card-info">
+                  <p>  {{ section.age }}</p>
+                  <p>  {{ section.address }}</p>
+                  <p>  {{ section.place }}</p>
+                </div>
+
+                <div class="card-schedule">
+                  <span>{{ section.days }}</span>
+
+                  <span v-for="time in section.times" :key="time" class="time-slot">
+                    {{ time }}
+                  </span>
+                </div>
+              </div>
+
+              <button class="more-button" @click="openDetail(section)">
+                Подробнее
+              </button>
+            </article>
+
+          </section>
+        </main>
+
+        <aside class="filters-wrapper">
+          <h2 class="filters-title">Фильтры</h2>
+
+          <div class="filters-sidebar">
+
+            <div class="filter-block">
+              <label class="filter-label">Возраст</label>
+              <select class="filter-select">
+                <option>Любой</option>
+              </select>
+            </div>
+
+            <div class="filter-block">
+              <label class="filter-label">Пол</label>
+
+              <div class="checkbox-group">
+                <label class="checkbox-label">
+                  <input type="checkbox" checked>
+                  <span>Мужской</span>
+                </label>
+
+                <label class="checkbox-label">
+                  <input type="checkbox" checked>
+                  <span>Женский</span>
+                </label>
+              </div>
+            </div>
+
+            <div class="filter-block">
+              <label class="filter-label">Каталог</label>
+
+              <div v-for="cat in filterCatalog" :key="cat.name" class="accordion">
+
+                <div class="accordion-header" @click="toggleAccordion(cat)">
+
+                  <span>{{ cat.name }}</span>
+
+                  <span>
+                    {{ cat.isOpen ? '▲' : '▼' }}
+                  </span>
+                </div>
+
+                <ul v-show="cat.isOpen" class="accordion-list">
+
+                  <li v-for="item in cat.items" :key="item.name">
+
+                    <span>{{ item.name }}</span>
+
+                    <span class="count">
+                      {{ item.count }}
+                    </span>
+                  </li>
+                </ul>
+
+              </div>
+            </div>
+
+          </div>
+        </aside>
+
+      </div>
+    </div>
+
+    <div v-if="currentPage === 'detail'" class="detail-page">
+
+      <div class="detail-toolbar">
+        <button class="back-button" @click="currentPage='catalog'">
+          ← Назад
+        </button>
+
+        <button class="map-button">
+          На карте 📍
+        </button>
+      </div>
+
+      <h1 class="section-title">
+        {{ selectedSection.title }}
+      </h1>
+
+      <article class="detail-top-card">
+
+        <div class="detail-top-image">
+          <div class="card-image-placeholder">📷</div>
+        </div>
+
+        <div class="detail-top-content">
+
+          <div class="detail-badges">
+            <span class="tag tag-status">
+              Набор открыт
+            </span>
+          </div>
+
+          <div class="detail-meta">
+            <p>  {{ selectedSection.age }}</p>
+            <p>  {{ selectedSection.address }}</p>
+            <p>  {{ selectedSection.place }}</p>
+          </div>
+
+        </div>
+
+        <button class="enroll-button">
+          Записаться
+        </button>
+
+      </article>
+
+      <div class="detail-block detail-row">
+
+        <div class="detail-column">
+          <h2 class="block-title">
+            ГРУППЫ
+          </h2>
+
+          <h3 class="block-subtitle">
+            Этап начальной подготовки
+          </h3>
+
+          <div class="group-info">
+            <p>Петрова Елена Александровна</p>
+            <p>  15 из 20</p>
+            <p>12 месяцев</p>
+          </div>
+        </div>
+
+        <div class="detail-column">
+          <h2 class="block-title">
+            РАСПИСАНИЕ ЗАНЯТИЙ
+          </h2>
+
+          <div class="schedule-row">
+            <span>{{ selectedSection.days }}</span>
+          </div>
+
+          <div class="schedule-row">
+            <span v-for="time in selectedSection.times" :key="time" class="time-slot">
+              {{ time }}
+            </span>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="program-section">
+
+        <h2 class="program-section-title">
+          СОДЕРЖАНИЕ ПРОГРАММЫ
+        </h2>
+
+        <details open class="program-accordion">
+          <summary class="accordion-header">Базовый уровень</summary>
+          <div class="accordion-content">
+            <p>Базовый уровень сложности первый-второй год обучения, 252 часа.</p>
+            <ul class="program-list">
+              <li>Обязательные предметные области (количество часов - 15);</li>
+              <li>Вариативные предметные области (количество часов - 10);</li>
+              <li>Теория (количество часов - 5);</li>
+              <li>Практика (количество часов - 216);</li>
+              <li>Самостоятельная работа (количество часов - 2);</li>
+              <li>Аттестация (количество часов - 4);</li>
+            </ul>
+            <p>Базовый уровень сложности третий-четвертый год обучения, 416 часов.</p>
+            <ul class="program-list">
+              <li>Обязательные предметные области (количество часов - 25);</li>
+              <li>Вариативные предметные области (количество часов - 15);</li>
+              <li>Теория (количество часов - 7);</li>
+              <li>Практика (количество часов - 361);</li>
+              <li>Самостоятельная работа (количество часов - 4);</li>
+              <li>Аттестация (количество часов - 4);</li>
+            </ul>
+            <p>Базовый уровень сложности пятый-шестой год обучения, 420 часов.</p>
+            <ul class="program-list">
+              <li>Обязательные предметные области (количество часов - 27);</li>
+              <li>Вариативные предметные области (количество часов - 15);</li>
+              <li>Теория (количество часов - 8);</li>
+              <li>Практика (количество часов - 360);</li>
+              <li>Самостоятельная работа (количество часов - 6);</li>
+              <li>Аттестация (количество часов - 4);</li>
+            </ul>
+          </div>
+        </details>
+
+        <details class="program-accordion">
+          <summary class="accordion-header">Углублённый уровень</summary>
+          <div class="accordion-content">
+            <p>Углублённый уровень...да....</p>
+          </div>
+        </details>
+
+      </div>
+      <script src="https://unpkg.com/vue@3"></script>
+      <script>
+        Vue.createApp({
+          data() {
+            return {
+              currentPage: 'catalog',
+              selectedSection: null,
+              activeTab: 'Все',
+              tabs: ['Все', 'Платные', 'Бесплатные'],
+
+              categories: [{ name: 'Силовой спорт', sections: [{ id: 1, title: 'Тяжелая атлетика (на ул. Боткина)', tag: 'Тяжелая атлетика', age: '10-18 лет', address: 'г. Иркутск, Юбилейный мкр., стр. 49/1', place: 'ФОК "Юбилейный"', days: 'Пн, Ср, Пт', times: ['09:00 - 10:30', '12:00 - 13:30'], price: '500 руб.', image: '' }, { id: 2, title: 'Тяжелая атлетика (на ул. Норильской)', tag: 'Тяжелая атлетика', age: '10-18 лет', address: 'г. Иркутск, Юбилейный мкр., стр. 49/1', place: 'ФОК "Юбилейный"', days: 'Пн, Ср, Пт', times: ['09:00 - 10:30', '12:00 - 13:30', '18:00 - 19:30'], price: '3200 руб.', image: '' }, { id: 3, title: 'Пауэрлифтинг', tag: 'Пауэрлифтинг', age: '10-18 лет', address: 'г. Иркутск, Юбилейный мкр., стр. 49/1', place: 'ФОК "Юбилейный"', days: 'Пн, Ср, Пт', times: ['09:00 - 10:30', '12:00 - 13:30', '18:00 - 19:30'], free: true, image: '' }] }, { name: 'Единоборства', sections: [{ id: 4, title: 'Дзюдо', tag: 'Дзюдо', age: '6-18 лет', address: 'г. Иркутск, ул. Трудовая, д.115А', place: 'СК "Вымпел"', days: 'Пн, Ср, Пт', times: ['09:00 - 10:30', '12:00 - 13:30', '18:00 - 19:30'], free: true, image: '' }, { id: 5, title: 'Вольная борьба (на ул. Норильская)', tag: 'Вольная борьба', age: '6-18 лет', address: 'г. Иркутск, ул. Трудовая, д.115А', place: 'СК "Вымпел"', days: 'Пн, Ср, Пт', times: ['09:00 - 10:30', '12:00 - 13:30', '18:00 - 19:30'], price: '3200 руб./мес', image: '' }] }, { name: 'Единоборства', sections: [{ id: 4, title: 'Дзюдо', tag: 'Дзюдо', age: '6-18 лет', address: 'г. Иркутск, ул. Трудовая, д.115А', place: 'СК "Вымпел"', days: 'Пн, Ср, Пт', times: ['09:00 - 10:30', '12:00 - 13:30', '18:00 - 19:30'], free: true, image: '' }, { id: 5, title: 'Вольная борьба (на ул. Норильская)', tag: 'Вольная борьба', age: '6-18 лет', address: 'г. Иркутск, ул. Трудовая, д.115А', place: 'СК "Вымпел"', days: 'Пн, Ср, Пт', times: ['09:00 - 10:30', '12:00 - 13:30', '18:00 - 19:30'], price: '3200 руб./мес', image: '' }] }, { name: 'Единоборства', sections: [{ id: 4, title: 'Дзюдо', tag: 'Дзюдо', age: '6-18 лет', address: 'г. Иркутск, ул. Трудовая, д.115А', place: 'СК "Вымпел"', days: 'Пн, Ср, Пт', times: ['09:00 - 10:30', '12:00 - 13:30', '18:00 - 19:30'], free: true, image: '' }, { id: 5, title: 'Вольная борьба (на ул. Норильская)', tag: 'Вольная борьба', age: '6-18 лет', address: 'г. Иркутск, ул. Трудовая, д.115А', place: 'СК "Вымпел"', days: 'Пн, Ср, Пт', times: ['09:00 - 10:30', '12:00 - 13:30', '18:00 - 19:30'], price: '3200 руб./мес', image: '' }] }, { name: 'Единоборства', sections: [{ id: 4, title: 'Дзюдо', tag: 'Дзюдо', age: '6-18 лет', address: 'г. Иркутск, ул. Трудовая, д.115А', place: 'СК "Вымпел"', days: 'Пн, Ср, Пт', times: ['09:00 - 10:30', '12:00 - 13:30', '18:00 - 19:30'], free: true, image: '' }, { id: 5, title: 'Вольная борьба (на ул. Норильская)', tag: 'Вольная борьба', age: '6-18 лет', address: 'г. Иркутск, ул. Трудовая, д.115А', place: 'СК "Вымпел"', days: 'Пн, Ср, Пт', times: ['09:00 - 10:30', '12:00 - 13:30', '18:00 - 19:30'], price: '3200 руб./мес', image: '' }] }],
+
+              filterCatalog: [
+                {
+                  name: 'Силовой спорт', count: 3, open: true, items: [
+                    { name: 'Тяжелая атлетика', count: 3 },
+                    { name: 'Пауэрлифтинг', count: 1 }
+                  ]
+                },
+                {
+                  name: 'Единоборства', count: 2, open: true, items: [
+                    { name: 'Вольная борьба', count: 1 },
+                    { name: 'Дзюдо', count: 1 }
+                  ]
+                },
+                { name: 'ДПИ и ремесла' },
+                { name: 'Техническое конструирование' },
+                { name: 'Словесность' },
+                { name: 'Иностранные языки' },
+                { name: 'Развитие интеллекта' },
+                { name: 'Информационные технологии' },
+                { name: 'История и Традиции' },
+                { name: 'Педагогика' },
+                { name: 'Музыка и звук' },
+                { name: 'Пение' },
+                { name: 'Хореография(танцы)' },
+                { name: 'Зрелищные искусства' },
+                { name: 'Мода и стиль' },
+                { name: 'Познавательные развлечения' },
+                { name: 'Туризм' },
+                { name: 'Естественные науки' },
+                { name: 'Люди и животные' },
+                { name: 'Эстетические виды спорта' },
+                { name: 'Технические виды спорта' },
+                { name: 'Командно-игровой спорт' },
+                { name: 'Индивидуально игровой спорт' },
+                { name: 'Водные виды спорта' },
+                { name: 'Легкая атлетика и гимнастика' },
+                { name: 'Физкультура' }
+              ]
+            }
+          },
+
+          methods: {
+            openDetail(section) {
+              this.selectedSection = section;
+              this.currentPage = 'detail';
+            },
+
+            toggleAccordion(cat) {
+              cat.isOpen = !cat.isOpen;
+            }
+          }
+        }).mount('#app');
+      </script>
+
+
+</body>
+
+</html>
